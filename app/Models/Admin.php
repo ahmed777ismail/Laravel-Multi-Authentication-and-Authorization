@@ -4,18 +4,20 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-use App\Notifications\AdminPasswordNotification;
-use App\Notifications\UpdatedEmailNotification;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\UpdatedEmailNotification;
+use App\Notifications\AdminPasswordNotification;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 
 class Admin extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
-
+    use HasRoles;
 
     public function sendPasswordResetNotification($token)
     {
@@ -50,6 +52,17 @@ class Admin extends Authenticatable implements MustVerifyEmail
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
     ];
+
+    ##--------------------------------- ACCESSORS & MUTATORS
+    protected function password(): Attribute
+    {
+        return Attribute::make(
+            set: function ($value) {
+                if ($value != null) {
+                    return bcrypt($value);
+                }
+            },
+        );
+    }
 }
