@@ -10,13 +10,14 @@ use Illuminate\Notifications\Notification;
 class AdminPasswordNotification extends Notification
 {
     use Queueable;
+    public $token;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct($token)
     {
-        //
+        $this->token = $token;
     }
 
     /**
@@ -35,9 +36,10 @@ class AdminPasswordNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+            ->line('You are receiving this email because we received a password reset request for your account.')
+            ->action('Admin Reset Password', url('/back/reset-password', $this->token))
+            ->line('This password reset link will expire in 60 minutes.')
+            ->line('If you did not request a password reset, no further action is required.');
     }
 
     /**
